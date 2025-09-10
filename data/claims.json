@@ -1,0 +1,113 @@
+[
+  {
+    "id": "30001",
+    "patient_name": "Virginia Rhodes",
+    "billed_amount": "639787.37",
+    "paid_amount": "16001.57",
+    "status": "Denied",
+    "insurer_name": "United Healthcare",
+    "discharge_date": "2022-12-19",
+    "cpt_codes": "99204, 82947, 99406",
+    "denial_reason": "Policy terminated before service date"
+  },
+  {
+    "id": "30002",
+    "patient_name": "Maria Chen",
+    "billed_amount": "3400.00",
+    "paid_amount": "0.00",
+    "status": "Denied",
+    "insurer_name": "Aetna",
+    "discharge_date": "2023-07-16",
+    "cpt_codes": "99213, 80053",
+    "denial_reason": "Coverage not verified at time of service"
+  },
+  {
+    "id": "30003",
+    "patient_name": "Ravi Kumar",
+    "billed_amount": "5725.00",
+    "paid_amount": "2000.00",
+    "status": "Under Review",
+    "insurer_name": "Cigna",
+    "discharge_date": "2023-06-30",
+    "cpt_codes": "99215, 93000",
+    "denial_reason": ""
+  },
+  {
+    "id": "30004",
+    "patient_name": "Sarah Johnson",
+    "billed_amount": "2200.00",
+    "paid_amount": "2200.00",
+    "status": "Paid",
+    "insurer_name": "Blue Cross Blue Shield",
+    "discharge_date": "2023-07-02",
+    "cpt_codes": "99214, 80061",
+    "denial_reason": ""
+  },
+  {
+    "id": "30005",
+    "patient_name": "Laura Martínez",
+    "billed_amount": "4000.00",
+    "paid_amount": "0.00",
+    "status": "Denied",
+    "insurer_name": "Humana",
+    "discharge_date": "2023-07-19",
+    "cpt_codes": "99213, 82947",
+    "denial_reason": "Prior authorization required but not obtained"
+  },
+  {
+    "id": "30006",
+    "patient_name": "James Wilson",
+    "billed_amount": "8500.00",
+    "paid_amount": "4250.00",
+    "status": "Under Review",
+    "insurer_name": "Kaiser Permanente",
+    "discharge_date": "2023-08-05",
+    "cpt_codes": "99215, 93000, 80061",
+    "denial_reason": ""
+  },
+  {
+    "id": "30007",
+    "patient_name": "Emily Davis",
+    "billed_amount": "1500.00",
+    "paid_amount": "1500.00",
+    "status": "Paid",
+    "insurer_name": "United Healthcare",
+    "discharge_date": "2023-08-12",
+    "cpt_codes": "99213",
+    "denial_reason": ""
+  },
+  {
+    "id": "30008",
+    "patient_name": "Michael Brown",
+    "billed_amount": "12000.00",
+    "paid_amount": "0.00",
+    "status": "Denied",
+    "insurer_name": "Aetna",
+    "discharge_date": "2023-08-20",
+    "cpt_codes": "99215, 93000, 80053, 82947",
+    "denial_reason": "Out of network provider"
+  },
+  {
+    "id": "30009",
+    "patient_name": "Jennifer Taylor",
+    "billed_amount": "3200.00",
+    "paid_amount": "3200.00",
+    "status": "Paid",
+    "insurer_name": "Cigna",
+    "discharge_date": "2023-08-25",
+    "cpt_codes": "99214, 80061",
+    "denial_reason": ""
+  },
+  {
+    "id": "30010",
+    "patient_name": "David Anderson",
+    "billed_amount": "7500.00",
+    "paid_amount": "0.00",
+    "status": "Pending",
+    "insurer_name": "Blue Cross Blue Shield",
+    "discharge_date": "2023-09-01",
+    "cpt_codes": "99215, 93000",
+    "denial_reason": ""
+  }
+]
+

@@ -1,0 +1,823 @@
+{% extends 'claims/base.html' %}
+{% load currency_filters %}
+
+{% block content %}
+<div class="bg-white min-h-screen">
+    <!-- A) Header with reduced spacing -->
+    <!-- <div class="px-6 py-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+        <p class="text-lg text-gray-600">Overview of claims analysis and management statistics</p>
+    </div> -->
+
+    <!-- B) Filters Row (Desktop Only) - Full Width Like Claims Listing -->
+    <div class="px-6 py-6 hidden md:block">
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6">
+            <div class="text-center mb-6">
+                <!-- <h3 class="text-xl font-bold text-blue-900 mb-2">Dashboard Filters</h3> -->
+                <!-- <p class="text-sm text-blue-700">Filter your data by date range, insurer, and status</p> -->
+            </div>
+            
+            <form method="GET" class="flex flex-wrap gap-6 items-end justify-center">
+                <div class="min-w-56">
+                    <label for="from_date" class="block text-base font-semibold text-gray-700 mb-3">From Date</label>
+                    <input 
+                        type="date" 
+                        id="from_date" 
+                        name="from_date" 
+                        value="{{ current_filters.from_date }}"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
+                    >
+                </div>
+                
+                <div class="min-w-56">
+                    <label for="to_date" class="block text-base font-semibold text-gray-700 mb-3">To Date</label>
+                    <input 
+                        type="date" 
+                        id="to_date" 
+                        name="to_date" 
+                        value="{{ current_filters.to_date }}"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white"
+                    >
+                </div>
+                
+                <div class="min-w-56">
+                    <label for="insurer" class="block text-base font-semibold text-gray-700 mb-3">Insurer</label>
+                    <div class="relative">
+                        <select 
+                            id="insurer" 
+                            name="insurer" 
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white appearance-none"
+                        >
+                            <option value="">All Insurers</option>
+                            {% for insurer in insurers %}
+                                <option value="{{ insurer }}" {% if current_filters.insurer == insurer %}selected{% endif %}>{{ insurer }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="min-w-56">
+                    <label for="status" class="block text-base font-semibold text-gray-700 mb-3">Status</label>
+                    <div class="relative">
+                        <select 
+                            id="status" 
+                            name="status" 
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm bg-white appearance-none"
+                        >
+                            {% for status in statuses %}
+                                <option value="{{ status|lower }}" {% if current_filters.status == status|lower %}selected{% endif %}>{{ status }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button 
+                        type="submit" 
+                        class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-sm flex items-center gap-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"></path>
+                        </svg>
+                        Apply Filters
+                    </button>
+                    
+                    <a 
+                        href="{% url 'claims:dashboard' %}" 
+                        class="px-8 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-sm flex items-center gap-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Clear All
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- C) KPI Strip -->
+    <div class="px-6 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Claims -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Total Claims</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ total_claims|floatformat:0 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paid + Payment Rate -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6 border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Paid + Rate</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ paid_claims|floatformat:0 }}</p>
+                            <p class="text-sm font-semibold text-green-600">{{ payment_rate }}% payment rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Denied + Denial Rate -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6 border-l-4 border-red-500">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Denied + Rate</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ denied_claims|floatformat:0 }}</p>
+                            <p class="text-sm font-semibold text-red-600">{{ denial_rate }}% denial rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Under Review -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6 border-l-4 border-yellow-500">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-base font-medium text-gray-600">Under Review</p>
+                            <p class="text-3xl font-bold text-gray-900">{{ under_review_claims|floatformat:0 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- D) Trends Charts -->
+    <div class="px-6 pb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Claims by Month -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6">
+                <div class="border-l-4 border-blue-500 px-4 py-3 mb-6">
+                    <h3 class="text-xl font-bold text-blue-900">Claims by Month</h3>
+                    <p class="text-sm text-blue-700 mt-1">Monthly claims distribution by status</p>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="claimsByMonthChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Payment Ratio by Month -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6">
+                <div class="border-l-4 border-blue-500 px-4 py-3 mb-6">
+                    <h3 class="text-xl font-bold text-blue-900">Payment Ratio by Month</h3>
+                    <p class="text-sm text-blue-700 mt-1">Payment success rate trends over time</p>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="paymentRatioChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- E) Breakdown -->
+    <div class="px-6 pb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- By Insurer -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6">
+                <div class="border-l-4 border-blue-500 px-4 py-3 mb-6">
+                    <h3 class="text-xl font-bold text-blue-900">Claims by Insurer</h3>
+                    <p class="text-sm text-blue-700 mt-1">Claims distribution across insurance providers</p>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="insurerChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Top CPT Codes - Pareto Chart -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6">
+                <div class="border-l-4 border-blue-500 px-4 py-3 mb-6">
+                    <h3 class="text-xl font-bold text-blue-900">Top CPT Codes (Pareto Analysis)</h3>
+                    <p class="text-sm text-blue-700 mt-1">Most frequent procedure codes and cumulative impact</p>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="cptParetoChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- F) Operational -->
+    <div class="px-6 pb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-6">
+            <!-- Aging Analysis -->
+            <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6">
+                <div class="border-l-4 border-blue-500 px-4 py-3 mb-6">
+                    <h3 class="text-xl font-bold text-blue-900">Aging (Under Review)</h3>
+                    <p class="text-sm text-blue-700 mt-1">Claims pending review by time period</p>
+                </div>
+                <div class="relative h-48">
+                    <canvas id="agingChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- G) Spotlight - Top Underpayment -->
+    <div class="px-6 pb-6">
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 p-6">
+            <div class="border-l-4 border-blue-500 px-4 py-3 mb-6">
+                <h3 class="text-xl font-bold text-blue-900">Top Potential Underpayments</h3>
+                <p class="text-sm text-blue-700 mt-1">Highest value claims with payment discrepancies</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-blue-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Claim ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Insurer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Billed</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Paid</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Underpayment</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for claim in top_underpayment %}
+                        <tr class="hover:bg-blue-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ claim.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ claim.insurer_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ claim.billed_amount|currency }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ claim.paid_amount|currency }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-orange-600">{{ claim.underpayment_amount|currency }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Corporate Professional Color Palette
+const palette = {
+    primary: '#2563EB',      // Primary Blue - main data
+    secondary: '#EA6A47',    // Orange - secondary data, highlights
+    tertiary: '#0891B2',     // Teal - tertiary data
+    background: '#F1F1F1',   // Light Gray - backgrounds
+    dark: '#1E40AF',         // Dark Blue - emphasis
+    light: '#DBEAFE'         // Light Blue - subtle fills
+};
+
+// Claims by Month Chart
+const monthlyData = {{ monthly_data_json|safe }};
+const claimsByMonthCtx = document.getElementById('claimsByMonthChart').getContext('2d');
+
+// Process monthly data for chart
+const months = [...new Set(monthlyData.map(item => item.month))].sort();
+const paidData = months.map(month => {
+    const item = monthlyData.find(d => d.month === month && d.status === 'Paid');
+    return item ? item.count : 0;
+});
+const deniedData = months.map(month => {
+    const item = monthlyData.find(d => d.month === month && d.status === 'Denied');
+    return item ? item.count : 0;
+});
+const underReviewData = months.map(month => {
+    const item = monthlyData.find(d => d.month === month && d.status === 'Under Review');
+    return item ? item.count : 0;
+});
+
+new Chart(claimsByMonthCtx, {
+    type: 'bar',
+    data: {
+        labels: months.map(month => new Date(month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })),
+        datasets: [
+            {
+                label: 'Paid',
+                data: paidData,
+                backgroundColor: 'rgba(37, 99, 235, 0.80)',
+                borderColor: palette.primary,
+                borderWidth: 1
+            },
+            {
+                label: 'Denied',
+                data: deniedData,
+                backgroundColor: 'rgba(234, 106, 71, 0.80)',
+                borderColor: palette.secondary,
+                borderWidth: 1
+            },
+            {
+                label: 'Under Review',
+                data: underReviewData,
+                backgroundColor: 'rgba(8, 145, 178, 0.80)',
+                borderColor: palette.tertiary,
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                stacked: true,
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    color: '#374151'
+                }
+            },
+            y: {
+                stacked: true,
+                beginAtZero: true,
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    color: '#374151'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#374151'
+                }
+            }
+        }
+    }
+});
+
+// Payment Ratio Chart
+const paymentRatioData = {{ payment_ratio_json|safe }};
+const paymentRatioCtx = document.getElementById('paymentRatioChart').getContext('2d');
+
+// Process payment ratio data for chart
+const paymentRatioMonths = paymentRatioData.map(item => item.month);
+const paymentRatioValues = paymentRatioData.map(item => item.payment_ratio);
+
+new Chart(paymentRatioCtx, {
+    type: 'line',
+    data: {
+        labels: paymentRatioMonths.map(month => new Date(month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })),
+        datasets: [{
+            label: 'Payment Ratio %',
+            data: paymentRatioValues,
+            borderColor: palette.primary,
+            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+            tension: 0.4,
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: palette.primary,
+            pointBorderColor: palette.primary,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    color: '#374151'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    color: '#374151'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#374151'
+                }
+            }
+        }
+    }
+});
+
+// Insurer Chart
+const insurerData = {{ insurer_data_json|safe }};
+const insurerCtx = document.getElementById('insurerChart').getContext('2d');
+
+// Process insurer data for chart
+const insurers = [...new Set(insurerData.map(item => item.insurer_name))];
+const insurerPaidData = insurers.map(insurer => {
+    const item = insurerData.find(d => d.insurer_name === insurer && d.status === 'Paid');
+    return item ? item.count : 0;
+});
+const insurerDeniedData = insurers.map(insurer => {
+    const item = insurerData.find(d => d.insurer_name === insurer && d.status === 'Denied');
+    return item ? item.count : 0;
+});
+const insurerUnderReviewData = insurers.map(insurer => {
+    const item = insurerData.find(d => d.insurer_name === insurer && d.status === 'Under Review');
+    return item ? item.count : 0;
+});
+
+new Chart(insurerCtx, {
+    type: 'bar',
+    data: {
+        labels: insurers,
+        datasets: [
+            {
+                label: 'Paid',
+                data: insurerPaidData,
+                backgroundColor: 'rgba(37, 99, 235, 0.80)',
+                borderColor: palette.primary,
+                borderWidth: 1,
+                borderRadius: 4
+            },
+            {
+                label: 'Denied',
+                data: insurerDeniedData,
+                backgroundColor: 'rgba(234, 106, 71, 0.80)',
+                borderColor: palette.secondary,
+                borderWidth: 1,
+                borderRadius: 4
+            },
+            {
+                label: 'Under Review',
+                data: insurerUnderReviewData,
+                backgroundColor: 'rgba(8, 145, 178, 0.80)',
+                borderColor: palette.tertiary,
+                borderWidth: 1,
+                borderRadius: 4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                stacked: true,
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    color: '#374151'
+                }
+            },
+            y: {
+                stacked: true,
+                beginAtZero: true,
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    color: '#374151'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#374151'
+                }
+            }
+        }
+    }
+});
+
+// CPT Codes Pareto Chart
+const cptData = {{ top_cpt_codes_json|safe }};
+const cptParetoCtx = document.getElementById('cptParetoChart').getContext('2d');
+
+// Sort by count descending
+const sortedCptData = cptData.sort((a, b) => b[1] - a[1]);
+
+// Extract data
+const labels = sortedCptData.map(item => item[0]);
+const counts = sortedCptData.map(item => item[1]);
+const totalCount = counts.reduce((sum, count) => sum + count, 0);
+
+// Calculate cumulative percentages
+const cumulative = counts.map((count, index) => {
+    const sum = counts.slice(0, index + 1).reduce((acc, val) => acc + val, 0);
+    return (sum / totalCount) * 100;
+});
+
+new Chart(cptParetoCtx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Count',
+                type: 'bar',
+                data: counts,
+                backgroundColor: 'rgba(37, 99, 235, 0.70)',
+                borderColor: palette.primary,
+                borderWidth: 1,
+                yAxisID: 'y'
+            },
+            {
+                label: 'Cumulative %',
+                type: 'line',
+                data: cumulative,
+                borderColor: palette.tertiary,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointBackgroundColor: palette.tertiary,
+                pointBorderColor: palette.tertiary,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                yAxisID: 'y1',
+                fill: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        layout: {
+            padding: {
+                top: 20,
+                bottom: 20,
+                left: 10,
+                right: 10
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'CPT Code',
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    color: '#374151'
+                },
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    font: {
+                        size: 10
+                    },
+                    color: '#374151'
+                }
+            },
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Count',
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    color: '#374151'
+                },
+                beginAtZero: true,
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    font: {
+                        size: 10
+                    },
+                    color: '#374151'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Cumulative %',
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    color: '#374151'
+                },
+                min: 0,
+                max: 100,
+                grid: {
+                    drawOnChartArea: false,
+                },
+                ticks: {
+                    font: {
+                        size: 10
+                    },
+                    color: '#374151',
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    padding: 20,
+                    color: '#374151'
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                titleColor: '#374151',
+                bodyColor: '#374151',
+                borderColor: '#E5E7EB',
+                borderWidth: 1,
+                cornerRadius: 6,
+                displayColors: true,
+                callbacks: {
+                    afterLabel: function(context) {
+                        if (context.datasetIndex === 1) {
+                            return `Cumulative: ${context.parsed.y.toFixed(1)}%`;
+                        }
+                        return `Count: ${context.parsed.y}`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Aging Analysis Chart
+const agingData = {{ aging_buckets|safe }};
+const agingCtx = document.getElementById('agingChart').getContext('2d');
+
+// Prepare data for horizontal bar chart
+const agingLabels = ['0-30 days', '31-60 days', '61-90 days', '90+ days'];
+const agingCounts = [
+    agingData['0-30'] || 0,
+    agingData['31-60'] || 0,
+    agingData['61-90'] || 0,
+    agingData['90+'] || 0
+];
+
+new Chart(agingCtx, {
+    type: 'bar',
+    data: {
+        labels: agingLabels,
+        datasets: [{
+            label: 'Claims Count',
+            data: agingCounts,
+            backgroundColor: [
+                palette.primary,   // Blue for 0-30 days (good)
+                palette.secondary, // Orange for 31-60 days (warning)
+                palette.tertiary,  // Teal for 61-90 days (concerning)
+                palette.dark       // Dark Blue for 90+ days (critical)
+            ],
+            borderColor: [
+                palette.primary,
+                palette.secondary,
+                palette.tertiary,
+                palette.dark
+            ],
+            borderWidth: 1,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        indexAxis: 'y', // This makes it horizontal
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 40 // Extra space for value labels
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Number of Claims',
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    color: '#374151'
+                },
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    font: {
+                        size: 10
+                    },
+                    color: '#374151'
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Aging Period',
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    color: '#374151'
+                },
+                grid: {
+                    color: '#F1F5F9'
+                },
+                ticks: {
+                    font: {
+                        size: 10
+                    },
+                    color: '#374151'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false // Hide legend since it's obvious from colors
+            },
+            tooltip: {
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                titleColor: '#374151',
+                bodyColor: '#374151',
+                borderColor: '#E5E7EB',
+                borderWidth: 1,
+                cornerRadius: 6,
+                callbacks: {
+                    label: function(context) {
+                        return `${context.label}: ${context.parsed.x} claims`;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+
+

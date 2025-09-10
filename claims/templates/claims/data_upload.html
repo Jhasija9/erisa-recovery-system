@@ -1,0 +1,406 @@
+{% extends 'claims/base.html' %}
+
+{% block title %}Data Upload - ERISA Recovery{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+    <!-- Modern Hero Section -->
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 border-b border-blue-200">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                    Data <span class="text-blue-600">Upload</span>
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Import claims data and details into the system with our modern, intuitive upload interface
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Current Data Status Card -->
+        <div class="mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Current Data Status</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Total claims in database: <span class="font-bold text-blue-600">{{ total_claims }}</span>
+                        </p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Upload both files to add claims with complete details
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Upload Form -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Form Header -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Upload Claims Data</h2>
+                <p class="text-sm text-gray-600 mt-1">Select your files and configure upload settings</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="p-6" x-data="uploadForm()">
+                {% csrf_token %}
+                
+                <!-- File Upload Section -->
+                <div class="space-y-8">
+                    <!-- Claims File Upload -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">Claims File</h3>
+                            <span class="text-sm text-gray-500">Required</span>
+                        </div>
+                        
+                        <!-- Drag and Drop Zone for Claims -->
+                        <div class="relative">
+                            <div 
+                                x-data="fileUpload('claims')"
+                                @drop.prevent="handleDrop($event, 'claims')"
+                                @dragover.prevent="isDragging = true"
+                                @dragleave.prevent="isDragging = false"
+                                @click="$refs.fileInput.click()"
+                                :class="{
+                                    'border-blue-400 bg-blue-50': isDragging,
+                                    'border-gray-300 bg-white': !isDragging,
+                                    'border-red-300 bg-red-50': hasError
+                                }"
+                                class="relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 hover:border-blue-400 hover:bg-blue-50"
+                            >
+                                <input 
+                                    x-ref="fileInput"
+                                    type="file" 
+                                    name="claims_file"
+                                    accept=".json,.csv"
+                                    @change="handleFileSelect($event, 'claims')"
+                                    class="hidden"
+                                >
+                                
+                                <div class="space-y-4">
+                                    <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div>
+                                        <p class="text-lg font-medium text-gray-900">
+                                            <span x-show="!selectedFile">Drop your claims file here</span>
+                                            <span x-show="selectedFile" x-text="selectedFile.name"></span>
+                                        </p>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            <span x-show="!selectedFile">or click to browse</span>
+                                            <span x-show="selectedFile" x-text="formatFileSize(selectedFile.size)"></span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="text-xs text-gray-400">
+                                        Supports JSON and CSV files up to 10MB
+                                    </div>
+                                </div>
+                                
+                                <!-- File Preview -->
+                                <div x-show="selectedFile" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <span class="text-sm text-green-800">File selected successfully</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Error Display -->
+                            {% if form.claims_file.errors %}
+                                <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <div class="flex">
+                                        <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div class="text-sm text-red-800">
+                                            {% for error in form.claims_file.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <p class="mt-2 text-sm text-gray-500">{{ form.claims_file.help_text }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Details File Upload -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">Claim Details File</h3>
+                            <span class="text-sm text-gray-500">Optional</span>
+                        </div>
+                        
+                        <!-- Drag and Drop Zone for Details -->
+                        <div class="relative">
+                            <div 
+                                x-data="fileUpload('details')"
+                                @drop.prevent="handleDrop($event, 'details')"
+                                @dragover.prevent="isDragging = true"
+                                @dragleave.prevent="isDragging = false"
+                                @click="$refs.fileInput.click()"
+                                :class="{
+                                    'border-green-400 bg-green-50': isDragging,
+                                    'border-gray-300 bg-white': !isDragging,
+                                    'border-red-300 bg-red-50': hasError
+                                }"
+                                class="relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 hover:border-green-400 hover:bg-green-50"
+                            >
+                                <input 
+                                    x-ref="fileInput"
+                                    type="file" 
+                                    name="details_file"
+                                    accept=".json,.csv"
+                                    @change="handleFileSelect($event, 'details')"
+                                    class="hidden"
+                                >
+                                
+                                <div class="space-y-4">
+                                    <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div>
+                                        <p class="text-lg font-medium text-gray-900">
+                                            <span x-show="!selectedFile">Drop your details file here</span>
+                                            <span x-show="selectedFile" x-text="selectedFile.name"></span>
+                                        </p>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            <span x-show="!selectedFile">or click to browse</span>
+                                            <span x-show="selectedFile" x-text="formatFileSize(selectedFile.size)"></span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="text-xs text-gray-400">
+                                        Supports JSON and CSV files up to 10MB
+                                    </div>
+                                </div>
+                                
+                                <!-- File Preview -->
+                                <div x-show="selectedFile" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <span class="text-sm text-green-800">File selected successfully</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Error Display -->
+                            {% if form.details_file.errors %}
+                                <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <div class="flex">
+                                        <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div class="text-sm text-red-800">
+                                            {% for error in form.details_file.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <p class="mt-2 text-sm text-gray-500">{{ form.details_file.help_text }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Section -->
+                <div class="mt-8 pt-8 border-t border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 mb-6">Upload Configuration</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- File Format Selection -->
+                        <div>
+                            <label for="{{ form.file_format.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-3">
+                                {{ form.file_format.label }}
+                            </label>
+                            <div class="relative">
+                                {{ form.file_format }}
+                            </div>
+                            {% if form.file_format.errors %}
+                                <div class="mt-2 text-sm text-red-600">
+                                    {% for error in form.file_format.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Clear Existing Data -->
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                {{ form.clear_existing }}
+                            </div>
+                            <div class="ml-3">
+                                <label for="{{ form.clear_existing.id_for_label }}" class="text-sm font-medium text-gray-700">
+                                    {{ form.clear_existing.label }}
+                                </label>
+                                <p class="text-sm text-gray-500 mt-1">{{ form.clear_existing.help_text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-4">
+                    <a href="{% url 'claims:dashboard' %}" 
+                       class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 font-medium">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-sm">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            Upload Data
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- File Format Examples -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Claims File Format -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Claims File Format (JSON)</h3>
+                    <p class="text-sm text-gray-600 mt-1">Example structure for claims data</p>
+                </div>
+                <div class="p-6">
+                    <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-sm text-green-400"><code>[
+  {
+    "id": "30001",
+    "patient_name": "Virginia Rhodes",
+    "billed_amount": "639787.37",
+    "paid_amount": "16001.57",
+    "status": "Denied",
+    "insurer_name": "United Healthcare",
+    "discharge_date": "2022-12-19"
+  }
+]</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details File Format -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Details File Format (JSON)</h3>
+                    <p class="text-sm text-gray-600 mt-1">Example structure for claim details</p>
+                </div>
+                <div class="p-6">
+                    <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-sm text-green-400"><code>[
+  {
+    "claim_id": "30001",
+    "cpt_codes": "99204, 82947, 99406",
+    "denial_reason": "Policy terminated before service date"
+  }
+]</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Alpine.js components for file upload functionality
+function uploadForm() {
+    return {
+        // Form state management
+    }
+}
+
+function fileUpload(type) {
+    return {
+        selectedFile: null,
+        isDragging: false,
+        hasError: false,
+        
+        handleDrop(event, fileType) {
+            this.isDragging = false;
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                // FIXED: Create a proper FileList-like object and trigger the input change
+                const file = files[0];
+                this.setFileToInput(file, fileType);
+            }
+        },
+        
+        handleFileSelect(event, fileType) {
+            const file = event.target.files[0];
+            if (file) {
+                this.setFileToInput(file, fileType);
+            }
+        },
+        
+        // FIXED: New method to properly set the file to the input
+        setFileToInput(file, fileType) {
+            // Validate file
+            const allowedTypes = ['application/json', 'text/csv'];
+            const allowedExtensions = ['.json', '.csv'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                this.hasError = true;
+                alert('Please select a JSON or CSV file');
+                return;
+            }
+            
+            if (file.size > 10 * 1024 * 1024) {
+                this.hasError = true;
+                alert('File size must be less than 10MB');
+                return;
+            }
+            
+            // FIXED: Create a new FileList and set it to the input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            this.$refs.fileInput.files = dataTransfer.files;
+            
+            // Update visual state
+            this.selectedFile = file;
+            this.hasError = false;
+            
+            // Trigger change event to ensure form validation works
+            this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+        },
+        
+        formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    }
+}
+</script>
+{% endblock %}

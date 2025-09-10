@@ -1,0 +1,12 @@
+id,patient_name,billed_amount,paid_amount,status,insurer_name,discharge_date,cpt_codes,denial_reason
+30001,Virginia Rhodes,639787.37,16001.57,Denied,United Healthcare,2022-12-19,"99204, 82947, 99406",Policy terminated before service date
+30002,Maria Chen,3400.00,0.00,Denied,Aetna,2023-07-16,"99213, 80053",Coverage not verified at time of service
+30003,Ravi Kumar,5725.00,2000.00,Under Review,Cigna,2023-06-30,"99215, 93000",
+30004,Sarah Johnson,2200.00,2200.00,Paid,Blue Cross Blue Shield,2023-07-02,"99214, 80061",
+30005,Laura Martínez,4000.00,0.00,Denied,Humana,2023-07-19,"99213, 82947",Prior authorization required but not obtained
+30006,James Wilson,8500.00,4250.00,Under Review,Kaiser Permanente,2023-08-05,"99215, 93000, 80061",
+30007,Emily Davis,1500.00,1500.00,Paid,United Healthcare,2023-08-12,99213,
+30008,Michael Brown,12000.00,0.00,Denied,Aetna,2023-08-20,"99215, 93000, 80053, 82947",Out of network provider
+30009,Jennifer Taylor,3200.00,3200.00,Paid,Cigna,2023-08-25,"99214, 80061",
+30010,David Anderson,7500.00,0.00,Pending,Blue Cross Blue Shield,2023-09-01,"99215, 93000",
+

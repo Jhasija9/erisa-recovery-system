@@ -1,0 +1,460 @@
+{% extends 'claims/base.html' %}
+{% load currency_filters %}
+
+{% block title %}Claims Management System - ERISA Recovery{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+    <!-- Modern Filter Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <form method="GET" class="space-y-6">
+                <!-- Search Bar with Icon -->
+                <div class="relative">
+                    <label for="search" class="block text-sm font-semibold text-gray-700 mb-3">Search Claims</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="search" 
+                            name="search" 
+                            value="{{ search_query }}"
+                            placeholder="Search by patient name or claim ID..."
+                            class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400 text-sm"
+                            hx-get="{% url 'claims:claims_list' %}"
+                            hx-target="#claims-table-container"
+                            hx-trigger="keyup changed delay:500ms"
+                            hx-include="[name='status'], [name='insurer'], [name='per_page']"
+                            hx-push-url="true"
+                            hx-preserve="scroll"
+                            onkeyup="updateSearchContext(this.value)"
+                        >
+                    </div>
+                </div>
+                
+                <!-- Filter Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Status Filter -->
+                    <div>
+                        <label for="status" class="block text-sm font-semibold text-gray-700 mb-3">Status</label>
+                        <div class="relative">
+                            <select 
+                                id="status" 
+                                name="status" 
+                                class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm appearance-none bg-white"
+                                hx-get="{% url 'claims:claims_list' %}"
+                                hx-target="#claims-table-container"
+                                hx-trigger="change"
+                                hx-include="[name='search'], [name='insurer'], [name='per_page']"
+                                hx-push-url="true"
+                                hx-preserve="scroll"
+                                onchange="updateSearchContext(document.getElementById('search').value)"
+                            >
+                                <!-- FIXED: Remove the manual "All Statuses" option since it's already in status_choices -->
+                                {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Insurer Filter -->
+                    <div>
+                        <label for="insurer" class="block text-sm font-semibold text-gray-700 mb-3">Insurer</label>
+                        <div class="relative">
+                            <select 
+                                id="insurer" 
+                                name="insurer" 
+                                class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm appearance-none bg-white"
+                                hx-get="{% url 'claims:claims_list' %}"
+                                hx-target="#claims-table-container"
+                                hx-trigger="change"
+                                hx-include="[name='search'], [name='status'], [name='per_page']"
+                                hx-push-url="true"
+                                hx-preserve="scroll"
+                                onchange="updateSearchContext(document.getElementById('search').value)"
+                            >
+                                <option value="">All Insurers</option>
+                                {% for insurer in insurers %}
+                                    <option value="{{ insurer }}" {% if insurer_filter == insurer %}selected{% endif %}>{{ insurer }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Per Page Filter -->
+                    <div>
+                        <label for="per_page" class="block text-sm font-semibold text-gray-700 mb-3">Per Page</label>
+                        <div class="relative">
+                            <select 
+                                id="per_page" 
+                                name="per_page" 
+                                class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm appearance-none bg-white"
+                                hx-get="{% url 'claims:claims_list' %}"
+                                hx-target="#claims-table-container"
+                                hx-trigger="change"
+                                hx-include="[name='search'], [name='status'], [name='insurer']"
+                                hx-push-url="true"
+                                hx-preserve="scroll"
+                                onchange="updateSearchContext(document.getElementById('search').value)"
+                            >
+                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex items-end space-x-3">
+                        <button 
+                            type="submit" 
+                            class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 text-sm font-semibold shadow-sm"
+                        >
+                            Apply Filters
+                        </button>
+                        
+                        <!-- FIXED: Clear All Button - Now uses HTMX -->
+                        <button 
+                            type="button"
+                            class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 text-sm font-semibold"
+                            hx-get="{% url 'claims:claims_list' %}"
+                            hx-target="#claims-table-container"
+                            hx-trigger="click"
+                            hx-push-url="true"
+                            hx-preserve="scroll"
+                            onclick="clearAllFilters()"
+                        >
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Claims Table Container - ALL modern styling moved inside this container -->
+    <div id="claims-table-container" class="bg-white">
+        {% if claims %}
+        <!-- Modern styling wrapper moved INSIDE the container -->
+        <div class="px-6 py-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gradient-to-r from-blue-50 to-indigo-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Claim ID</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Patient</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Billed</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Paid</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Insurer</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Discharge Date</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-100">
+                                {% for claim in claims %}
+                                <tr class="hover:bg-blue-50 transition-all duration-200 group">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                        {{ claim.id }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ claim.patient_name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ claim.billed_amount|currency }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ claim.paid_amount|currency }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold
+                                            {% if claim.status == 'Paid' %}bg-green-100 text-green-800 border border-green-200
+                                            {% elif claim.status == 'Denied' %}bg-red-100 text-red-800 border border-red-200
+                                            {% elif claim.status == 'Under Review' %}bg-yellow-100 text-yellow-800 border border-yellow-200
+                                            {% else %}bg-gray-100 text-gray-800 border border-gray-200{% endif %}">
+                                            {{ claim.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ claim.insurer_name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ claim.discharge_date|date:"M d, Y" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2 items-center">
+                                            <!-- View Button -->
+                                            <button class="text-gray-400 hover:text-blue-600 transition-all duration-200 p-2 rounded-lg hover:bg-blue-100 group-hover:bg-blue-50" 
+                                                    title="View Details"
+                                                    hx-get="{% url 'claims:claim_detail' claim.id %}?mode=view" 
+                                                    hx-target="#claim-detail-content" 
+                                                    hx-trigger="click"
+                                                    @click="$dispatch('open-modal')">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </button>
+                                            
+                                            <!-- Edit Button -->
+                                            <button class="text-gray-400 hover:text-blue-600 transition-all duration-200 p-2 rounded-lg hover:bg-blue-100 group-hover:bg-blue-50" 
+                                                    title="Edit"
+                                                    hx-get="{% url 'claims:claim_detail' claim.id %}?mode=edit" 
+                                                    hx-target="#claim-detail-content" 
+                                                    hx-trigger="click"
+                                                    @click="$dispatch('open-modal')">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </button>
+                                            
+                                            <!-- Flag Status -->
+                                            {% if claim.has_unresolved_flags %}
+                                            <span class="text-red-500 text-lg p-2 rounded-lg hover:bg-red-50 transition-all duration-200" title="Flagged for review">🚩</span>
+                                            {% elif claim.has_resolved_flags %}
+                                            <span class="text-green-500 p-2 rounded-lg hover:bg-green-50 transition-all duration-200" title="Flag resolved">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                                </svg>
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Pagination -->
+        {% if claims.has_other_pages %}
+        <div class="bg-white px-6 py-6 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        {% if claims.has_previous %}
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page={{ claims.previous_page_number }}" 
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                Previous
+                            </a>
+                        {% endif %}
+                        {% if claims.has_next %}
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page={{ claims.next_page_number }}" 
+                               class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                Next
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing
+                                <span class="font-semibold">{{ claims.start_index }}</span>
+                                to
+                                <span class="font-semibold">{{ claims.end_index }}</span>
+                                of
+                                <span class="font-semibold">{{ claims.paginator.count }}</span>
+                                results
+                            </p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <!-- Quick Jump to Page -->
+                            <div class="flex items-center space-x-2">
+                                <label for="jump-to-page" class="text-sm text-gray-700 font-medium">Go to page:</label>
+                                <input 
+                                    type="number" 
+                                    id="jump-to-page" 
+                                    min="1" 
+                                    max="{{ claims.paginator.num_pages }}"
+                                    value="{{ claims.number }}"
+                                    class="w-16 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    onchange="jumpToPage(this.value)"
+                                >
+                                <span class="text-sm text-gray-500">of {{ claims.paginator.num_pages }}</span>
+                            </div>
+                            
+                            <!-- Pagination Navigation -->
+                            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                                <!-- First Page Button -->
+                                {% if claims.number > 3 %}
+                                    <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page=1" 
+                                       class="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+                                       title="Go to first page">
+                                        <span class="sr-only">First</span>
+                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                                
+                                <!-- Previous Page Button -->
+                                {% if claims.has_previous %}
+                                    <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page={{ claims.previous_page_number }}" 
+                                       class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+                                        <span class="sr-only">Previous</span>
+                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                                
+                                <!-- Page Numbers -->
+                                {% for page_num in claims.paginator.page_range %}
+                                    {% if page_num == claims.number %}
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-blue-300 bg-blue-600 text-sm font-medium text-white">
+                                            {{ page_num }}
+                                        </span>
+                                    {% elif page_num > claims.number|add:'-3' and page_num < claims.number|add:'3' %}
+                                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page={{ page_num }}" 
+                                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            {{ page_num }}
+                                        </a>
+                                    {% elif page_num == 1 and claims.number > 4 %}
+                                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page=1" 
+                                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            1
+                                        </a>
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                                            ...
+                                        </span>
+                                    {% elif page_num == claims.paginator.num_pages and claims.number < claims.paginator.num_pages|add:'-3' %}
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500">
+                                            ...
+                                        </span>
+                                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page={{ claims.paginator.num_pages }}" 
+                                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            {{ claims.paginator.num_pages }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <!-- Next Page Button -->
+                                {% if claims.has_next %}
+                                    <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page={{ claims.next_page_number }}" 
+                                       class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+                                        <span class="sr-only">Next</span>
+                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                                
+                                <!-- Last Page Button -->
+                                {% if claims.number < claims.paginator.num_pages|add:'-2' %}
+                                    <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if insurer_filter %}insurer={{ insurer_filter }}&{% endif %}per_page={{ per_page }}&page={{ claims.paginator.num_pages }}" 
+                                       class="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+                                       title="Go to last page">
+                                        <span class="sr-only">Last</span>
+                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="px-6 py-12 text-center">
+            <div class="max-w-full mx-auto">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No claims found</h3>
+                <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// FIXED: Enhanced jumpToPage function with HTMX instead of full page reload
+function jumpToPage(pageNumber) {
+    if (pageNumber && pageNumber >= 1) {
+        // Build URL with current filters
+        const url = new URL(window.location);
+        url.searchParams.set('page', pageNumber);
+        
+        // Use HTMX instead of full page reload
+        htmx.ajax('GET', url.toString(), {
+            target: '#claims-table-container',
+            pushUrl: true,
+            preserve: 'scroll'
+        });
+    }
+}
+
+// NEW: Clear all filters function
+function clearAllFilters() {
+    // Clear all form inputs
+    document.getElementById('search').value = '';
+    document.getElementById('status').value = '';
+    document.getElementById('insurer').value = '';
+    document.getElementById('per_page').value = '25';
+    
+    // Update search context
+    updateSearchContext('');
+}
+
+// Function to update search context when any filter changes
+function updateSearchContext(searchValue) {
+    // Update the global search context
+    window.currentSearchContext = {
+        search: searchValue,
+        page: '1', // Reset to page 1 when searching
+        status: document.querySelector('[name="status"]').value,
+        insurer: document.querySelector('[name="insurer"]').value,
+        perPage: document.querySelector('[name="per_page"]').value
+    };
+    
+    console.log('Updated search context:', window.currentSearchContext);
+}
+
+// Debug: Check what's actually in the URL
+console.log('Current URL:', window.location.href);
+console.log('URL search params:', window.location.search);
+
+// Store current search context globally
+window.currentSearchContext = {
+    search: '{{ search_query }}',
+    page: '{{ claims.number }}',
+    status: '{{ status_filter }}',
+    insurer: '{{ insurer_filter }}',
+    perPage: '{{ per_page }}'
+};
+
+console.log('Django search_query value:', '{{ search_query }}');
+console.log('Stored search context:', window.currentSearchContext);
+</script>
+{% endblock %}

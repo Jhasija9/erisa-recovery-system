@@ -1,0 +1,14 @@
+<div class="note-item bg-white border border-gray-200 rounded-lg p-4 mb-3">
+    <div class="flex items-start justify-between">
+        <div class="flex-1">
+            <div class="note-content text-gray-900 mb-2">{{ note.content }}</div>
+            <div class="note-meta flex items-center space-x-4 text-sm text-gray-500">
+                <span class="note-type px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                    {{ note.get_note_type_display }}
+                </span>
+                <span class="note-time">{{ note.time_ago }}</span>
+                <span class="note-user">by {{ note.user.username }}</span>
+            </div>
+        </div>
+    </div>
+</div>
