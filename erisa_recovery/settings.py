@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_extensions',
     'claims',
-    # Django Allauth
+    # Django Allauth - conditionally include for local development
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -50,18 +50,57 @@ INSTALLED_APPS = [
     'crispy_tailwind',
 ]
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Temporarily remove Allauth middleware for Vercel compatibility
-    # 'allauth.account.middleware.AccountMiddleware',
-]
+# Conditionally configure middleware based on environment
+if os.environ.get('VERCEL'):
+    # For Vercel: exclude Allauth middleware to avoid issubclass error
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
+    
+    # For Vercel: use basic authentication backends only
+    AUTHENTICATION_BACKENDS = [
+        'django.contrib.auth.backends.ModelBackend',
+    ]
+    
+    # For Vercel: disable Allauth settings
+    ACCOUNT_EMAIL_VERIFICATION = 'none'
+    ACCOUNT_EMAIL_REQUIRED = False
+    ACCOUNT_USERNAME_REQUIRED = True
+    ACCOUNT_AUTHENTICATION_METHOD = 'username'
+    ACCOUNT_UNIQUE_EMAIL = False
+else:
+    # For local development: include Allauth middleware
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'allauth.account.middleware.AccountMiddleware',
+    ]
+    
+    # For local development: use Allauth backends
+    AUTHENTICATION_BACKENDS = [
+        'django.contrib.auth.backends.ModelBackend',
+        'allauth.account.auth_backends.AuthenticationBackend',
+    ]
+    
+    # For local development: enable Allauth settings
+    ACCOUNT_EMAIL_VERIFICATION = 'none'
+    ACCOUNT_EMAIL_REQUIRED = True
+    ACCOUNT_USERNAME_REQUIRED = False
+    ACCOUNT_AUTHENTICATION_METHOD = 'email'
+    ACCOUNT_UNIQUE_EMAIL = True
 
 ROOT_URLCONF = 'erisa_recovery.urls'
 
@@ -151,33 +190,21 @@ LOGOUT_REDIRECT_URL = 'claims:login'
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Django Allauth settings
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
-# Allauth settings
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_UNIQUE_EMAIL = True
-
-# Google OAuth settings
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-            'prompt': 'select_account',
-        },
-        'OAUTH_PKCE_ENABLED': True,
+# Google OAuth settings (only for local development)
+if not os.environ.get('VERCEL'):
+    SOCIALACCOUNT_PROVIDERS = {
+        'google': {
+            'SCOPE': [
+                'profile',
+                'email',
+            ],
+            'AUTH_PARAMS': {
+                'access_type': 'online',
+                'prompt': 'select_account',
+            },
+            'OAUTH_PKCE_ENABLED': True,
+        }
     }
-}
 
 # WhiteNoise configuration for Vercel
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
