@@ -37,5 +37,23 @@ def handler(request, response):
 # For Vercel compatibility
 app = handler
 
+# This means: "If you're running on Vercel..."
+if os.environ.get('VERCEL'):
+    # Use memory instead of a file
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',  # This means "use memory, not a file"
+        }
+    }
+else:
+    # If you're on your computer, use the normal file
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',  # This is your normal file
+        }
+    }
+
 if __name__ == "__main__":
     main()
