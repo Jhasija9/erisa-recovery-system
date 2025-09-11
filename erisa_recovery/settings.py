@@ -59,8 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Add the required Allauth middleware
-    'allauth.account.middleware.AccountMiddleware',
+    # Temporarily remove Allauth middleware for Vercel compatibility
+    # 'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'erisa_recovery.urls'
@@ -133,7 +133,7 @@ STATICFILES_DIRS = [
 ]
 
 # Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.models.BigAutoField'
 
 # Site ID for django.contrib.sites
 SITE_ID = 1
