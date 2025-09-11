@@ -7,7 +7,7 @@ project_root = Path(__file__).parent.parent
 os.chdir(project_root)
 sys.path.insert(0, str(project_root))
 
-# Set environment variables
+# Set environment variables BEFORE importing Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'erisa_recovery.settings')
 os.environ.setdefault('VERCEL', 'true')
 
@@ -25,10 +25,23 @@ from django.core.wsgi import get_wsgi_application
 # Create the WSGI application
 application = get_wsgi_application()
 
-# Vercel handler
+# Vercel handler - more robust approach
 def handler(request, response):
     """Main handler for Vercel"""
-    return application(request, response)
+    try:
+        return application(request, response)
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Handler error: {e}")
+        # Return a basic response
+        response.status_code = 500
+        response.write(b"Internal Server Error")
+        return response
 
 # Alternative handler name
 app = handler
+
+# For Vercel compatibility
+def lambda_handler(event, context):
+    """AWS Lambda handler for Vercel"""
+    return application(event, context)
