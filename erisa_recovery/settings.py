@@ -23,12 +23,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Vercel-specific settings
-if os.environ.get('VERCEL'):
-    DEBUG = False
-    ALLOWED_HOSTS = ['*']
-else:
-    ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
@@ -39,74 +34,32 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'django_extensions',
     'claims',
-    # Django Allauth - conditionally include for local development
+    'crispy_forms',
+    'crispy_tailwind',
+    # Django Allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'crispy_forms',
-    'crispy_tailwind',
 ]
 
-# Conditionally configure middleware based on environment
-if os.environ.get('VERCEL'):
-    # For Vercel: exclude Allauth middleware to avoid issubclass error
-    MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'whitenoise.middleware.WhiteNoiseMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ]
-    
-    # For Vercel: use basic authentication backends only
-    AUTHENTICATION_BACKENDS = [
-        'django.contrib.auth.backends.ModelBackend',
-    ]
-    
-    # For Vercel: disable Allauth settings
-    ACCOUNT_EMAIL_VERIFICATION = 'none'
-    ACCOUNT_EMAIL_REQUIRED = False
-    ACCOUNT_USERNAME_REQUIRED = True
-    ACCOUNT_AUTHENTICATION_METHOD = 'username'
-    ACCOUNT_UNIQUE_EMAIL = False
-else:
-    # For local development: include Allauth middleware
-    MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'whitenoise.middleware.WhiteNoiseMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'allauth.account.middleware.AccountMiddleware',
-    ]
-    
-    # For local development: use Allauth backends
-    AUTHENTICATION_BACKENDS = [
-        'django.contrib.auth.backends.ModelBackend',
-        'allauth.account.auth_backends.AuthenticationBackend',
-    ]
-    
-    # For local development: enable Allauth settings
-    ACCOUNT_EMAIL_VERIFICATION = 'none'
-    ACCOUNT_EMAIL_REQUIRED = True
-    ACCOUNT_USERNAME_REQUIRED = False
-    ACCOUNT_AUTHENTICATION_METHOD = 'email'
-    ACCOUNT_UNIQUE_EMAIL = True
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+]
 
 ROOT_URLCONF = 'erisa_recovery.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.backends.django.DjangoTemplates',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -123,22 +76,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'erisa_recovery.wsgi.application'
 
 # Database
-# Use in-memory SQLite for Vercel (serverless)
-if os.environ.get('VERCEL'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    # Use regular SQLite for local development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -147,6 +90,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -172,7 +118,7 @@ STATICFILES_DIRS = [
 ]
 
 # Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Site ID for django.contrib.sites
 SITE_ID = 1
@@ -190,21 +136,41 @@ LOGOUT_REDIRECT_URL = 'claims:login'
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Google OAuth settings (only for local development)
-if not os.environ.get('VERCEL'):
-    SOCIALACCOUNT_PROVIDERS = {
-        'google': {
-            'SCOPE': [
-                'profile',
-                'email',
-            ],
-            'AUTH_PARAMS': {
-                'access_type': 'online',
-                'prompt': 'select_account',
-            },
-            'OAUTH_PKCE_ENABLED': True,
-        }
-    }
+# Django Allauth settings
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
-# WhiteNoise configuration for Vercel
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Allauth settings
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # For development
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/'
+
+# Social account settings
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+
+# Google OAuth settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+            'prompt': 'select_account',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
