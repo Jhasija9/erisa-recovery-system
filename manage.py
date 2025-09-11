@@ -18,42 +18,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-# Vercel entry point - this is what Vercel needs
-def handler(request, response):
-    """Vercel handler function."""
-    from django.core.wsgi import get_wsgi_application
-    from django.http import HttpResponse
-    
-    # Set up Django
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'erisa_recovery.settings')
-    
-    # Get the WSGI application
-    application = get_wsgi_application()
-    
-    # Handle the request
-    return application(request, response)
-
-
-# For Vercel compatibility
-app = handler
-
-# This means: "If you're running on Vercel..."
-if os.environ.get('VERCEL'):
-    # Use memory instead of a file
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',  # This means "use memory, not a file"
-        }
-    }
-else:
-    # If you're on your computer, use the normal file
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',  # This is your normal file
-        }
-    }
-
 if __name__ == "__main__":
     main()
