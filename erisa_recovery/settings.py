@@ -23,7 +23,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+# Vercel-specific settings
+if os.environ.get('VERCEL'):
+    DEBUG = False
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
@@ -34,32 +39,33 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django_extensions',
     'claims',
-    'crispy_forms',
-    'crispy_tailwind',
     # Django Allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'crispy_forms',
+    'crispy_tailwind',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'erisa_recovery.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'BACKEND': 'django.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -100,9 +106,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -153,21 +156,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth settings
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # For development
-ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
-ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-ACCOUNT_SIGNUP_REDIRECT_URL = '/'
-
-# Social account settings
-SOCIALACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
-SOCIALACCOUNT_QUERY_EMAIL = True
-SOCIALACCOUNT_LOGIN_ON_GET = True
-
+ACCOUNT_UNIQUE_EMAIL = True
 
 # Google OAuth settings
 SOCIALACCOUNT_PROVIDERS = {
@@ -176,7 +169,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email',
         ],
-        
         'AUTH_PARAMS': {
             'access_type': 'online',
             'prompt': 'select_account',
@@ -184,3 +176,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'OAUTH_PKCE_ENABLED': True,
     }
 }
+
+# WhiteNoise configuration for Vercel
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
