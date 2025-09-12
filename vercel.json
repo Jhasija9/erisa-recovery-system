@@ -16,6 +16,6 @@
       "dest": "erisa_recovery/wsgi.py"
     }
   ],
-  "buildCommand": "python manage.py migrate && python manage.py collectstatic --noinput"
+  // "buildCommand": "python manage.py migrate && python manage.py collectstatic --noinput"
 }
 
