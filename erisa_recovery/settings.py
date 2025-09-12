@@ -182,3 +182,19 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+# Railway-specific settings
+if os.environ.get('RAILWAY_ENVIRONMENT'):
+    # Railway-specific ALLOWED_HOSTS
+    ALLOWED_HOSTS = [
+        'erisarecoveryproject-production.up.railway.app',
+        '.railway.app',
+        'localhost',
+        '127.0.0.1'
+    ]
+    
+    # Ensure static files are collected
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
+    # Debug should be False in production
+    DEBUG = False
