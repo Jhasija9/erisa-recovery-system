@@ -2,22 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "build.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
+      "src": "erisa_recovery/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.9"
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/index.py"
+      "dest": "erisa_recovery/wsgi.py"
     }
-  ],
-  "env": {
-    "DJANGO_SETTINGS_MODULE": "erisa_recovery.settings"
-  }
+  ]
 }
 
