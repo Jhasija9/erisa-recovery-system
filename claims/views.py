@@ -19,6 +19,7 @@ from collections import Counter
 import json
 import os
 import tempfile
+from django.db import connection
 
 from .models import Claim, ClaimDetail, Flag, Note, UserProfile
 from .forms import DataUploadForm
@@ -433,15 +434,22 @@ def dashboard(request):
         total_paid = claims_qs.aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
         payment_rate = (total_paid / total_billed * 100) if total_billed > 0 else 0
     
-    # C) Monthly trends (last 6 months)
+    # C) Monthly trends (last 6 months) - Database agnostic
     six_months_ago = timezone.now() - timedelta(days=180)
+
+    # Use database-appropriate date function
+    if connection.vendor == 'postgresql':
+        date_func = "TO_CHAR(discharge_date, 'YYYY-MM-01')"
+    else:
+        date_func = "strftime('%%Y-%%m-01', discharge_date)"
+
     monthly_data = claims_qs.filter(discharge_date__gte=six_months_ago).extra(
-        select={'month': "strftime('%%Y-%%m-01', discharge_date)"}
+        select={'month': date_func}
     ).values('month', 'status').annotate(count=Count('id')).order_by('month')
     
     # Calculate payment ratio by month
     payment_ratio_data = claims_qs.filter(discharge_date__gte=six_months_ago).extra(
-        select={'month': "strftime('%%Y-%%m-01', discharge_date)"}
+        select={'month': date_func}
     ).values('month').annotate(
         total_billed=Sum('billed_amount'),
         total_paid=Sum('paid_amount')
