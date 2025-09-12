@@ -47,8 +47,8 @@ ehthumbs.db
 Thumbs.db
 
 # Static files (will be collected)
-staticfiles/
-static/
+# staticfiles/
+# static/
 
 # Media files
 media/
