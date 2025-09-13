@@ -46,27 +46,20 @@ The **ERISA Recovery Claims Management System** is a comprehensive, modern web a
 ## Features
 
 ### Core Features
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| **Advanced Dashboard** | Real-time KPIs, charts, and analytics | Complete |
-| **Smart Search & Filter** | Multi-criteria search with instant results | Complete |
-| **Claims Management** | Full CRUD operations with HTMX integration | Complete |
-| **Flagging System** | Flag claims for review with custom reasons | Complete |
-| **Note Management** | Add contextual notes and annotations | Complete |
-| **Data Upload** | Drag-and-drop CSV/JSON file processing | Complete |
-| **User Management** | Role-based access control (Admin/User) | Complete |
+- **Advanced Dashboard** - Real-time KPIs, charts, and analytics
+- **Smart Search & Filter** - Multi-criteria search with instant results
+- **Claims Management** - Full CRUD operations with HTMX integration
+- **Flagging System** - Flag claims for review with custom reasons
+- **Note Management** - Add contextual notes and annotations
+- **Data Upload** - Drag-and-drop CSV/JSON file processing
+- **User Management** - Role-based access control (Admin/User)
 
 ### Advanced Features
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| **Analytics Dashboard** | Claims by month, payment ratios, CPT analysis | Complete |
-| **Modern UI/UX** | Responsive design with Tailwind CSS | Complete |
-| **Real-time Updates** | HTMX-powered dynamic content | Complete |
-| **Secure Authentication** | Email/Username login with validation | Complete |
-| **Mobile Responsive** | Optimized for all device sizes | Complete |
-| **Smart Filtering** | Status, insurer, date range filtering | Complete |
+- **Analytics Dashboard** - Claims by month, payment ratios, CPT analysis
+- **Modern UI/UX** - Responsive design with Tailwind CSS
+- **Real-time Updates** - HTMX-powered dynamic content
+- **Secure Authentication** - Email/Username login with validation
+- **Smart Filtering** - Status, insurer, date range filtering
 
 ---
 
