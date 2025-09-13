@@ -160,7 +160,8 @@ python manage.py runserver
 
 ### Analytics Dashboard
 <img width="1512" height="854" alt="Screenshot 2025-09-13 at 12 32 31 PM" src="https://github.com/user-attachments/assets/4c192533-8503-49cc-b511-b5f94294939c" />
-### Data Upload
+
+### Data Ingest
 <img width="1512" height="858" alt="Screenshot 2025-09-13 at 12 32 16 PM" src="https://github.com/user-attachments/assets/09a3707a-74d3-40dd-9ff1-00271ce1e2d2" />
 
 ---
