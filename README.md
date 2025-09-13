@@ -120,8 +120,8 @@ pip install -r requirements.txt
 # Run migrations
 python manage.py migrate
 
-# Create superuser (required for admin access)
-python manage.py createsuperuser
+# Setup admin user
+python manage.py setup_auth
 ```
 
 ### 5. Start Development Server
@@ -136,7 +136,7 @@ python manage.py runserver
 - **Admin Panel**: http://127.0.0.1:8000/admin/
 
 ### 7. Load Data (Admin Only)
-1. **Login as Admin** - Use the superuser account you created
+1. **Login as Admin** - Use the admin credentials from setup_auth command
 2. **Navigate to Data Upload** - Go to the "Data Ingest" page
 3. **Upload Files** - Use the drag-and-drop interface to upload CSV/JSON files
 4. **Select Format** - Choose between JSON or CSV format
@@ -260,16 +260,11 @@ python manage.py setup_auth
 ```
 
 **What this command does:**
-- Creates admin user: `admin` / `admin123`
-- Sets up admin profile with full permissions
+- Creates admin user with full permissions
+- Sets up admin profile
 - Clears any existing test data
 - Enables access to dashboard and data upload features
-
-**Why create a superuser?**
-- **Admin Access**: Required to access the dashboard and data upload features
-- **Data Management**: Only admin users can upload CSV/JSON files
-- **System Control**: Full access to Django admin panel for user and data management
-- **Security**: Role-based access ensures only authorized users can modify data
+- **Run this command and you will get the admin login details**
 
 ---
 
