@@ -146,17 +146,26 @@ python manage.py runserver
 
 ## Screenshots
 
+
+### Register
+<img width="1512" height="856" alt="Screenshot 2025-09-13 at 12 32 47 PM" src="https://github.com/user-attachments/assets/8185ed2d-e647-40a6-b413-2437522dcf49" />
+
+### Login
+<img width="1512" height="856" alt="Screenshot 2025-09-13 at 12 30 55 PM" src="https://github.com/user-attachments/assets/7cbad2aa-fcc6-469a-aeb9-100293614327" />
+
+
 ### Claims Dashboard
-![Claims Dashboard](screenshots/claims-dashboard.png)
 *Modern, responsive claims listing with advanced filtering*
+<img width="1512" height="857" alt="Screenshot 2025-09-13 at 12 31 35 PM" src="https://github.com/user-attachments/assets/447f7fc7-0f3e-449f-bbff-51e10bd83b2e" />
+
 
 ### Analytics Dashboard
 ![Analytics Dashboard](screenshots/analytics-dashboard.png)
 *Comprehensive analytics with interactive charts*
-
+<img width="1512" height="854" alt="Screenshot 2025-09-13 at 12 32 31 PM" src="https://github.com/user-attachments/assets/4c192533-8503-49cc-b511-b5f94294939c" />
 ### Data Upload
-![Data Upload](screenshots/data-upload.png)
 *Drag-and-drop file upload with real-time validation*
+<img width="1512" height="858" alt="Screenshot 2025-09-13 at 12 32 16 PM" src="https://github.com/user-attachments/assets/09a3707a-74d3-40dd-9ff1-00271ce1e2d2" />
 
 ---
 
