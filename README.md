@@ -9,7 +9,7 @@
 
 **A modern, enterprise-grade claims management platform built with Django**
 
-[Live Demo](#) • [Documentation](#) • [Report Bug](#) • [Request Feature](#)
+[Live Demo](https://erisa-recovery-system.vercel.app/claims/login/?next=/claims/)
 
 </div>
 
@@ -35,8 +35,7 @@
 
 The **ERISA Recovery Claims Management System** is a comprehensive, modern web application designed to streamline insurance claims processing, analysis, and recovery operations. Built with Django and featuring a responsive, intuitive interface, it empowers healthcare organizations to efficiently manage denied claims and maximize revenue recovery.
 
-**🌐 [Try the Live Demo]([erisa-recovery-system.vercel.app](https://erisa-recovery-system.vercel.app/claims/login/?next=/claims/))**
-
+**�� [Try the Live Demo](https://erisa-recovery-system.vercel.app/claims/login/?next=/claims/)**
 
 ### Key Objectives
 - **Maximize Revenue Recovery** - Turn denied claims into payable revenue
