@@ -314,11 +314,6 @@ We welcome contributions! Please follow these steps:
 4. **Push to branch**: `git push origin feature/amazing-feature`
 5. **Open a Pull Request**
 
-### Development Guidelines
-- Follow PEP 8 style guidelines
-- Write tests for new features
-- Update documentation as needed
-- Use meaningful commit messages
 
 ---
 
