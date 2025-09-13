@@ -203,27 +203,36 @@ erisa_recovery_project/
 ### Authentication Endpoints
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/login/` | Login page |
-| `POST` | `/login/` | Authenticate user |
-| `GET` | `/register/` | Registration page |
-| `POST` | `/register/` | Create new user |
-| `GET` | `/logout/` | Logout user |
+| `GET` | `/claims/login/` | Login page |
+| `POST` | `/claims/login/` | Authenticate user |
+| `GET` | `/claims/register/` | Registration page |
+| `POST` | `/claims/register/` | Create new user |
+| `GET` | `/claims/logout/` | Logout user |
+| `GET` | `/claims/not-authorized/` | Not authorized page |
 
 ### Claims Endpoints
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/` | Claims list view |
-| `GET` | `/dashboard/` | Admin dashboard |
-| `GET` | `/claim/<id>/` | Claim detail view |
-| `POST` | `/claim/<id>/flag/` | Add flag to claim |
-| `POST` | `/claim/<id>/note/` | Add note to claim |
-| `POST` | `/claim/<id>/resolve-flag/` | Resolve flag |
+| `GET` | `/` | Home redirect to claims list |
+| `GET` | `/claims/` | Claims list view |
+| `GET` | `/claims/dashboard/` | Admin dashboard |
+| `GET` | `/claims/claim/<id>/` | Claim detail view |
+| `POST` | `/claims/claim/<id>/flag/` | Add flag to claim |
+| `POST` | `/claims/claim/<id>/note/` | Add note to claim |
+| `POST` | `/claims/claim/<id>/resolve-flag/` | Resolve flag |
 
 ### Data Management
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/upload/` | Data upload page (Admin only) |
-| `POST` | `/upload/` | Process uploaded data (Admin only) |
+| `GET` | `/claims/upload/` | Data upload page (Admin only) |
+| `POST` | `/claims/upload/` | Process uploaded data (Admin only) |
+
+### Admin & OAuth
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/admin/` | Django admin panel |
+| `GET` | `/accounts/google/login/` | Google OAuth login |
+| `GET` | `/accounts/google/login/callback/` | Google OAuth callback |
 
 ---
 
@@ -239,31 +248,16 @@ erisa_recovery_project/
 ### For Admin Users
 1. **Data Upload** - Access the "Data Ingest" page to upload new claims data
 2. **Dashboard Analytics** - View comprehensive statistics and analytics
-3. **User Management** - Manage user accounts and permissions
-4. **System Administration** - Access Django admin panel for advanced management
+3. **System Administration** - Access Django admin panel for advanced management
 
 ---
 
 ## Testing
 
-### Run Tests
+### Setup Admin User
 ```bash
-# Run all tests
-python manage.py test
-
-# Run specific app tests
-python manage.py test claims
-
-# Run with coverage
-coverage run --source='.' manage.py test
-coverage report
+python manage.py setup_auth
 ```
-
-### Test Coverage
-- **Models**: 95% coverage
-- **Views**: 90% coverage
-- **Forms**: 85% coverage
-- **Overall**: 92% coverage
 
 ---
 
@@ -295,18 +289,11 @@ Set these in your Vercel dashboard:
 SECRET_KEY=your-secret-key
 DEBUG=False
 ALLOWED_HOSTS=your-domain.vercel.app
-DB_NAME=your-db-name
-DB_USER=your-db-user
-DB_PASSWORD=your-db-password
-DB_HOST=your-db-host
-DB_PORT=5432
+DATABASE_URL=your-postgresql-url
+GOOGLE_OAUTH2_CLIENT_ID=your-google-client-id
+GOOGLE_OAUTH2_CLIENT_SECRET=your-google-client-secret
+SITE_ID=1
 ```
-
-### Alternative Deployment Options
-- **Heroku**: Use Heroku CLI and Procfile
-- **Railway**: Connect GitHub repository
-- **DigitalOcean**: Use App Platform
-- **AWS**: Use Elastic Beanstalk
 
 ---
 
@@ -340,15 +327,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Tailwind CSS** - For the utility-first CSS framework
 - **HTMX** - For dynamic HTML without JavaScript
 - **Chart.js** - For beautiful data visualization
-
----
-
-## Support
-
-- **Email**: support@erisa-recovery.com
-- **Discord**: [Join our community](#)
-- **Documentation**: [Full docs](#)
-- **Bug Reports**: [GitHub Issues](#)
 
 ---
 
